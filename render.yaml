@@ -4,7 +4,7 @@ services:
     name: daybook-api
     runtime: python
     rootDir: backend
-    plan: starter            # a persistent disk needs a paid plan (see note below)
+    plan: free 
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: python manage.py migrate && gunicorn config.wsgi
     healthCheckPath: /api/tasks/
