@@ -1,0 +1,36 @@
+services:
+  # ---------- Backend: Django API ----------
+  - type: web
+    name: daybook-api
+    runtime: python
+    rootDir: backend
+    plan: starter            # a persistent disk needs a paid plan (see note below)
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate && gunicorn config.wsgi
+    healthCheckPath: /api/tasks/
+    disk:
+      name: daybook-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: SQLITE_PATH
+        value: /var/data/db.sqlite3
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false          # you fill this in after the frontend is deployed
+
+  # ---------- Frontend: React static site ----------
+  - type: web
+    name: daybook-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false          # you fill this in with the backend URL
